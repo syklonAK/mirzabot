@@ -4,6 +4,8 @@
 
 ### A powerful Telegram bot for selling VPN services — with fully automated config creation.
 
+**This is a fork of [mahdiMGF2/mirzabot](https://github.com/mahdiMGF2/mirzabot) with an extra feature: a free config as a referral reward.**
+
 <p>
   <a href="https://t.me/mirzapanel">
     <img src="https://img.shields.io/badge/Telegram-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram Channel"/>
@@ -39,6 +41,7 @@
 - [🧩 Supported Panels](#-supported-panels)
 - [💳 Payment Gateways](#-payment-gateways)
 - [⚙️ Features](#️-features)
+- [🎁 Free config for referrals (fork feature)](#-free-config-for-referrals-fork-feature)
 - [🚀 Installation](#-installation)
   - [Prerequisites](#prerequisites)
   - [Install](#install)
@@ -115,7 +118,7 @@ Mirza Bot integrates with the most popular VPN and network management panels:
 - ✅ Mandatory channel membership for purchases
 
 ### 📈 Growth & Marketing
-- ✅ Affiliate / referral system
+- ✅ Affiliate / referral system (wallet gift, purchase commission **and free config reward**)
 - ✅ Cashback rewards
 - ✅ Discount codes
 - ✅ Gift codes
@@ -131,6 +134,33 @@ Mirza Bot integrates with the most popular VPN and network management panels:
 - ✅ Automatic backups
 - ✅ Notification & expiry-reminder services (cron)
 - ✅ On-hold configurations
+
+---
+
+## 🎁 Free config for referrals (fork feature)
+
+On top of the wallet gift and purchase commission of the original affiliate system, users can earn a **free config** after inviting a configurable number of members.
+
+**How users use it**
+
+1. Open the **👥 زیرمجموعه گیری / Referral** menu and share the personal link `https://t.me/<bot>?start=<user_id>`.
+2. The menu shows progress (`X of Y members`) and how many free configs were already received.
+3. When the threshold is reached, the **🎁 Get free config** button appears and the config is delivered instantly.
+
+**Admin settings** — *Admin panel → Referral*:
+
+| Button | Description |
+|--------|-------------|
+| 🎁 Referral free config | Turn the feature on/off (`onfreeconfig` / `offfreeconfig`) |
+| 👥 Referrals needed for free config | How many members are required per free config |
+| 🔢 Free config limit | Maximum number of free configs per user |
+
+**Behaviour**
+
+- The config is created through the existing trial-service path: the panel marked `ONTestAccount`, with its `val_usertest` volume and `time_usertest` duration — so it shows up in *My services*, in `invoice` and in the report channel.
+- Rewards are stored in the `affiliate_freeconfig` table with a `UNIQUE (id_user, reward_index)` key, so a double click or two parallel requests can never issue two configs, and changing the threshold later never re-issues or locks an already earned reward.
+- If config creation fails, the reservation is rolled back and the invoice is marked `Unsuccessful`.
+- Settings live in the `affiliates` table (`freeconfig_status`, `freeconfig_count`, `freeconfig_max`); the columns and the table are created automatically on the first run after updating.
 
 ---
 
@@ -151,7 +181,7 @@ Mirza Bot integrates with the most popular VPN and network management panels:
 Run the following command on your server as **root**:
 
 ```bash
-curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/mirzabot/main/install.sh && bash install.sh
+curl -o install.sh -L https://raw.githubusercontent.com/syklonAK/mirzabot/main/install.sh && bash install.sh
 ```
 
 An interactive menu will appear:
@@ -173,8 +203,10 @@ An interactive menu will appear:
 Run the same command and select **`2`**:
 
 ```bash
-curl -o install.sh -L https://raw.githubusercontent.com/mahdiMGF2/mirzabot/main/install.sh && bash install.sh
+curl -o install.sh -L https://raw.githubusercontent.com/syklonAK/mirzabot/main/install.sh && bash install.sh
 ```
+
+> ℹ️ This fork has no release tags, so the installer falls back to the **Beta (main)** source — that is the branch containing the referral free-config feature.
 
 ### Remove
 

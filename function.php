@@ -776,9 +776,14 @@ function affiliateFreeConfigStatus($from_id)
     $config = affiliateFreeConfigSetting();
     $user = select("user", "*", "id", $from_id, "select");
     $invites = intval($user['affiliatescount'] ?? 0);
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM affiliate_freeconfig WHERE id_user = :id_user");
-    $stmt->execute([':id_user' => $from_id]);
-    $claimed = intval($stmt->fetchColumn());
+    try {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM affiliate_freeconfig WHERE id_user = :id_user");
+        $stmt->execute([':id_user' => $from_id]);
+        $claimed = intval($stmt->fetchColumn());
+    } catch (Exception $e) {
+        $config['status'] = 'offfreeconfig';
+        $claimed = 0;
+    }
     $earned = intdiv($invites, $config['required']);
     if ($earned > $config['max'])
         $earned = $config['max'];

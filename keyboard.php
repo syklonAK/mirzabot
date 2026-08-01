@@ -1067,6 +1067,8 @@ $affiliates = json_encode([
         [['text' => $textbotlang['keyboard']['purchaseCommission']], ['text' => $textbotlang['keyboard']['startGift']]],
         [['text' => $textbotlang['keyboard']['firstPurchaseCommission']]],
         [['text' => $textbotlang['keyboard']['startGiftAmount']]],
+        [['text' => $textbotlang['keyboard']['affiliateFreeConfig']]],
+        [['text' => $textbotlang['keyboard']['affiliateFreeConfigCount']], ['text' => $textbotlang['keyboard']['affiliateFreeConfigMax']]],
         [['text' => $textbotlang['Admin']['backAdminBtn']], ['text' => $textbotlang['Admin']['backMenuBtn']]]
     ],
     'resize_keyboard' => true

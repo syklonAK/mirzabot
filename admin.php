@@ -5117,6 +5117,58 @@ elseif ($datain == "systemsms") {
     sendmessage($from_id, $textbotlang['Admin']['affiliates']['joinGiftSaved'], $affiliates, 'HTML');
     update("affiliates", "price_Discount", $text);
     step('home', $from_id);
+} elseif ($text == $textbotlang['keyboard']['affiliateFreeConfig'] && $adminrulecheck['rule'] == "administrator") {
+    $freeconfig = select("affiliates", "*", null, null, "select");
+    $keyboardfreeconfig = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $freeconfig['freeconfig_status'], 'callback_data' => $freeconfig['freeconfig_status']],
+            ],
+        ]
+    ]);
+    sendmessage($from_id, $textbotlang['Admin']['Status']['freeConfigAffiliates'], $keyboardfreeconfig, 'HTML');
+} elseif ($datain == "onfreeconfig" && $adminrulecheck['rule'] == "administrator") {
+    update("affiliates", "freeconfig_status", "offfreeconfig");
+    $keyboardfreeconfig = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => "offfreeconfig", 'callback_data' => "offfreeconfig"],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['freeConfigAffiliatesOff'], $keyboardfreeconfig);
+} elseif ($datain == "offfreeconfig" && $adminrulecheck['rule'] == "administrator") {
+    update("affiliates", "freeconfig_status", "onfreeconfig");
+    $keyboardfreeconfig = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => "onfreeconfig", 'callback_data' => "onfreeconfig"],
+            ],
+        ]
+    ]);
+    Editmessagetext($from_id, $message_id, $textbotlang['Admin']['Status']['freeConfigAffiliatesOn'], $keyboardfreeconfig);
+} elseif ($text == $textbotlang['keyboard']['affiliateFreeConfigCount'] && $adminrulecheck['rule'] == "administrator") {
+    sendmessage($from_id, $textbotlang['Admin']['affiliates']['askFreeConfigCount'], $backadmin, 'HTML');
+    step('setfreeconfigcount', $from_id);
+} elseif ($user['step'] == "setfreeconfigcount") {
+    if (!ctype_digit($text) || intval($text) < 1) {
+        sendmessage($from_id, $textbotlang['common']['invalidInput'], $backadmin, 'HTML');
+        return;
+    }
+    update("affiliates", "freeconfig_count", $text);
+    sendmessage($from_id, $textbotlang['Admin']['affiliates']['freeConfigCountSaved'], $affiliates, 'HTML');
+    step('home', $from_id);
+} elseif ($text == $textbotlang['keyboard']['affiliateFreeConfigMax'] && $adminrulecheck['rule'] == "administrator") {
+    sendmessage($from_id, $textbotlang['Admin']['affiliates']['askFreeConfigMax'], $backadmin, 'HTML');
+    step('setfreeconfigmax', $from_id);
+} elseif ($user['step'] == "setfreeconfigmax") {
+    if (!ctype_digit($text) || intval($text) < 1) {
+        sendmessage($from_id, $textbotlang['common']['invalidInput'], $backadmin, 'HTML');
+        return;
+    }
+    update("affiliates", "freeconfig_max", $text);
+    sendmessage($from_id, $textbotlang['Admin']['affiliates']['freeConfigMaxSaved'], $affiliates, 'HTML');
+    step('home', $from_id);
 } elseif ($datain == "mainbalanceaccount" && $adminrulecheck['rule'] == "administrator") {
     $PaySetting = json_decode(select("PaySetting", "ValuePay", "NamePay", "minbalance", "select")[$user['agent']], true);
     $textmin = $textbotlang['Admin']['Balance']['askMinCharge'];

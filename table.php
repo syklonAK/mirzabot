@@ -856,12 +856,15 @@ try {
         Discount varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NULL,
         price_Discount varchar(200)  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NULL,
         porsant_one_buy varchar(100),
+        freeconfig_status varchar(100),
+        freeconfig_count varchar(100),
+        freeconfig_max varchar(100),
         id_media varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NULL)
         ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci");
         if (!$result) {
             echo "table affiliates" . implode(' ', $pdo->errorInfo());
         }
-        $pdo->query("INSERT INTO affiliates (description,id_media,status_commission,Discount,porsant_one_buy) VALUES ('none','none','oncommission','onDiscountaffiliates','off_buy_porsant')");
+        $pdo->query("INSERT INTO affiliates (description,id_media,status_commission,Discount,porsant_one_buy,freeconfig_status,freeconfig_count,freeconfig_max) VALUES ('none','none','oncommission','onDiscountaffiliates','off_buy_porsant','offfreeconfig','5','1')");
     } else {
         $Check_filde = $pdo->query("SHOW COLUMNS FROM affiliates LIKE 'porsant_one_buy'");
         if (($Check_filde)->rowCount() != 1) {
@@ -885,6 +888,44 @@ try {
             $pdo->query("ALTER TABLE affiliates ADD status_commission VARCHAR(100)");
             $pdo->query("UPDATE affiliates SET status_commission = 'oncommission'");
             echo "The commission field was added ✅";
+        }
+        $Check_filde = $pdo->query("SHOW COLUMNS FROM affiliates LIKE 'freeconfig_status'");
+        if (($Check_filde)->rowCount() != 1) {
+            $pdo->query("ALTER TABLE affiliates ADD freeconfig_status VARCHAR(100)");
+            $pdo->query("UPDATE affiliates SET freeconfig_status = 'offfreeconfig'");
+            echo "The freeconfig_status field was added ✅";
+        }
+        $Check_filde = $pdo->query("SHOW COLUMNS FROM affiliates LIKE 'freeconfig_count'");
+        if (($Check_filde)->rowCount() != 1) {
+            $pdo->query("ALTER TABLE affiliates ADD freeconfig_count VARCHAR(100)");
+            $pdo->query("UPDATE affiliates SET freeconfig_count = '5'");
+            echo "The freeconfig_count field was added ✅";
+        }
+        $Check_filde = $pdo->query("SHOW COLUMNS FROM affiliates LIKE 'freeconfig_max'");
+        if (($Check_filde)->rowCount() != 1) {
+            $pdo->query("ALTER TABLE affiliates ADD freeconfig_max VARCHAR(100)");
+            $pdo->query("UPDATE affiliates SET freeconfig_max = '1'");
+            echo "The freeconfig_max field was added ✅";
+        }
+    }
+} catch (Exception $e) {
+    file_put_contents('error_log', $e->getMessage());
+}
+//-----------------------------------------------------------------
+try {
+    $result = $pdo->query("SHOW TABLES LIKE 'affiliate_freeconfig'");
+    if ($result->rowCount() == 0) {
+        $result = $pdo->query("CREATE TABLE affiliate_freeconfig (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        id_user BIGINT NOT NULL,
+        reward_index INT NOT NULL,
+        invites_used INT NOT NULL,
+        id_invoice VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+        date_reward VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+        UNIQUE KEY uq_affiliate_freeconfig (id_user, reward_index))
+        ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci");
+        if (!$result) {
+            echo "table affiliate_freeconfig" . implode(' ', $pdo->errorInfo());
         }
     }
 } catch (Exception $e) {

@@ -183,6 +183,7 @@ Current language: <b>{lang}</b>',
                         'testService3' => 'Test service',
                         'testService4' => 'Test service',
                         'testService5' => 'Test service',
+                        'freeConfigService' => 'Referral free config',
                         'testServiceFn' => 'Test service',
                         'unknown' => 'Unknown',
                         'unlimited' => 'Unlimited',
@@ -494,6 +495,16 @@ Use the button below to pay👇🏻',
                         'verified' => 'Your account was verified successfully',
                 ],
                 'affiliates' => [
+                        'freeConfigInfo' => '<b>🎁 Free config for referrals:</b>
+• 1 free config for every %s referrals
+• Your progress: %s of %s users
+• Received: %s of %s',
+                        'freeConfigOff' => '❌ The free config for referrals section is disabled',
+                        'freeConfigNotEnough' => '📛 You have not reached the required number yet; %s more referrals needed.',
+                        'freeConfigLimit' => '⛔ You have reached your free config limit.',
+                        'freeConfigNoPanel' => '❌ No panel is currently configured for the free config.',
+                        'freeConfigError' => '❌ Creating the free config failed, please try again later.',
+                        'freeConfigProcessing' => '⏳ Your previous request is being processed, please wait a moment.',
                         'affiliateedago' => '❌ You have previously been another user\'s referral, so you cannot become a referral again',
                         'affiliatesidyou' => '❌ It is not possible to become a referral with this user ID.',
                         'invalidaffiliates' => '❌ You cannot be your own referral',
@@ -1515,6 +1526,9 @@ Number of products sold: %s
                         'commission' => 'Status of the gift-after-bot-start feature being enabled',
                         'commissionOff' => 'The commission feature was disabled',
                         'commissionOn' => 'The commission feature was enabled',
+                        'freeConfigAffiliates' => 'Status of the referral free config feature',
+                        'freeConfigAffiliatesOn' => 'Referral free config was enabled',
+                        'freeConfigAffiliatesOff' => 'Referral free config was disabled',
                         'discountAffiliates' => 'Status of the gift feature being enabled',
                         'discountAffiliatesOff' => 'The gift feature was disabled',
                         'discountAffiliatesOn' => 'The gift feature was enabled',
@@ -1572,6 +1586,10 @@ Number of products sold: %s
                         'percentSaved' => '✅ The deposit percentage for the user was successfully set',
                         'bannerSaved' => '✅ Your banner was successfully registered.',
                         'invalidBanner' => '❌ The banner you sent is invalid (the banner must be sent with an image)',
+                        'askFreeConfigCount' => '📌 Enter the number of referrals required to receive one free config',
+                        'freeConfigCountSaved' => '✅ The required referral count for the free config was saved',
+                        'askFreeConfigMax' => '📌 Enter the maximum number of free configs each user can receive',
+                        'freeConfigMaxSaved' => '✅ The free config limit was saved',
                         'askJoinGift' => '📌 Enter the amount you want the user to receive for each new referral',
                         'askPercent' => '📌 Send the percentage you want to be deposited to the user after a purchase',
                         'titleTopic' => '🎁 Commission reports',
@@ -2831,6 +2849,12 @@ User balance before purchase : %s
 - 🆔User numeric ID : %s
 - 💸 Transaction amount %s
 - 💳 Payment method :  Third Rial currency',
+                        'freeConfigGranted' => '🎁 Referral free config
+
+👤 User : %s
+🆔 Username : @%s
+👥 Referrals : %s
+📦 Service : %s',
                         'membershipGiftPaid' => '🎁 Membership gift payment
  -Numeric ID : %s
  - Username : @%s
@@ -4041,6 +4065,10 @@ We hope you had a good experience with the ease and speed of your service. If yo
                 'serviceSettings' => '⚙️ Service settings',
                 'serviceStatus' => 'Service status',
                 'setAffiliateBanner' => '🏞 Set referral banner',
+                'getFreeConfig' => '🎁 Get free config',
+                'affiliateFreeConfig' => '🎁 Referral free config',
+                'affiliateFreeConfigCount' => '👥 Referrals needed for free config',
+                'affiliateFreeConfigMax' => '🔢 Free config limit',
                 'setAffiliatePercent' => '🧮 Set referral percentage',
                 'setApi' => 'Set api',
                 'setAqayePardakhtMerchant' => 'Set Aghaye Pardakht merchant',

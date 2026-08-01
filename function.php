@@ -759,6 +759,112 @@ function generateUsername($from_id, $Metode, $username, $randomString, $text, $n
         return $usernamecustom . "_" . $user['number_username'];
     }
 }
+function affiliateFreeConfigSetting()
+{
+    $affiliates = select("affiliates", "*", null, null, "select");
+    $required = intval($affiliates['freeconfig_count'] ?? 0);
+    $max = intval($affiliates['freeconfig_max'] ?? 0);
+    return array(
+        'status' => $affiliates['freeconfig_status'] ?? 'offfreeconfig',
+        'required' => $required < 1 ? 5 : $required,
+        'max' => $max < 1 ? 1 : $max,
+    );
+}
+function affiliateFreeConfigStatus($from_id)
+{
+    global $pdo;
+    $config = affiliateFreeConfigSetting();
+    $user = select("user", "*", "id", $from_id, "select");
+    $invites = intval($user['affiliatescount'] ?? 0);
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM affiliate_freeconfig WHERE id_user = :id_user");
+    $stmt->execute([':id_user' => $from_id]);
+    $claimed = intval($stmt->fetchColumn());
+    $earned = intdiv($invites, $config['required']);
+    if ($earned > $config['max'])
+        $earned = $config['max'];
+    $claimable = $earned - $claimed;
+    if ($claimable < 0)
+        $claimable = 0;
+    $progress = $invites - ($claimed * $config['required']);
+    if ($progress < 0)
+        $progress = 0;
+    if ($progress > $config['required'])
+        $progress = $config['required'];
+    return array_merge($config, array(
+        'invites' => $invites,
+        'claimed' => $claimed,
+        'claimable' => $claimable,
+        'progress' => $progress,
+        'remaining' => $config['required'] - $progress,
+    ));
+}
+function reserveAffiliateFreeConfig($from_id, $reward_index, $invites)
+{
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("INSERT INTO affiliate_freeconfig (id_user, reward_index, invites_used, date_reward) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$from_id, $reward_index, $invites, time()]);
+        return intval($pdo->lastInsertId());
+    } catch (Exception $e) {
+        return 0;
+    }
+}
+function createAffiliateFreeConfig($from_id, $username)
+{
+    global $pdo, $ManagePanel, $textbotlang;
+    $panel = select("marzban_panel", "*", "TestAccount", "ONTestAccount", "select");
+    if (!$panel || !isset($panel['code_panel']))
+        return array('status' => false, 'error' => 'nopanel');
+    if ($panel['hide_user'] != null) {
+        $list_user = json_decode($panel['hide_user'], true);
+        if (is_array($list_user) && in_array($from_id, $list_user))
+            return array('status' => false, 'error' => 'nopanel');
+    }
+    if ($panel['type'] == "Manualsale") {
+        $stmt = $pdo->prepare("SELECT * FROM manualsell WHERE codepanel = :codepanel AND codeproduct = 'usertest' AND status = 'active'");
+        $stmt->execute([':codepanel' => $panel['code_panel']]);
+        if ($stmt->rowCount() == 0)
+            return array('status' => false, 'error' => 'stock');
+    }
+    $randomString = bin2hex(random_bytes(4));
+    $username_ac = strtolower("ref_" . $from_id . "_" . $randomString);
+    $DataUserOut = $ManagePanel->DataUser($panel['name_panel'], $username_ac);
+    if (isset($DataUserOut['username']) || rowExists("invoice", "username", $username_ac))
+        $username_ac = rand(1000000, 9999999) . "_" . $username_ac;
+    $datac = array(
+        'expire' => strtotime(date("Y-m-d H:i:s", strtotime("+" . $panel['time_usertest'] . "hours"))),
+        'data_limit' => $panel['val_usertest'] * 1048576,
+        'from_id' => $from_id,
+        'username' => $username,
+        'type' => 'usertest'
+    );
+    $notifctions = json_encode(array(
+        'volume' => false,
+        'time' => false,
+    ));
+    $stmt = $pdo->prepare("INSERT IGNORE INTO invoice (id_user, id_invoice, username,time_sell, Service_location, name_product, price_product, Volume, Service_time,Status,notifctions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$from_id, $randomString, $username_ac, time(), $panel['name_panel'], $textbotlang['common']['labels']['freeConfigService'], "0", $panel['val_usertest'], $panel['time_usertest'], "active", $notifctions]);
+    $dataoutput = $ManagePanel->createUser($panel['name_panel'], "usertest", $username_ac, $datac);
+    if ($dataoutput['username'] == null) {
+        update("invoice", "Status", "Unsuccessful", "id_invoice", $randomString);
+        return array('status' => false, 'error' => 'create', 'msg' => json_encode($dataoutput['msg']), 'panel' => $panel);
+    }
+    $output_config_link = $panel['sublink'] == "onsublink" ? $dataoutput['subscription_url'] : "";
+    if ($panel['config'] == "onconfig" && is_array($dataoutput['configs'])) {
+        for ($i = 0; $i < count($dataoutput['configs']); ++$i) {
+            $output_config_link .= "\n" . $dataoutput['configs'][$i];
+        }
+    }
+    return array(
+        'status' => true,
+        'panel' => $panel,
+        'invoice' => $randomString,
+        'username_service' => $dataoutput['username'],
+        'configs' => $dataoutput['configs'],
+        'sub_link' => $output_config_link,
+        'subscription_url' => $dataoutput['subscription_url'],
+    );
+}
 function outputlink($text)
 {
     $ch = curl_init();

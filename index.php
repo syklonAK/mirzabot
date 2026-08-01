@@ -5725,14 +5725,30 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
     $stmt->execute();
     $inforefral = $stmt->fetch(PDO::FETCH_ASSOC);
     $inforefral['total_price'] = ($inforefral['total_price'] * $setting['affiliatespercentage']) / 100;
-    $keyboard_share = json_encode([
-        'inline_keyboard' => [
-            [
-                ['text' => $textbotlang['keyboard']['receiveMembershipGift'], 'callback_data' => "get_gift_start"],
-                ['text' => $textbotlang['keyboard']['shareLink'], 'url' => "https://t.me/share/url?url=https://t.me/$usernamebot?start=$from_id"],
-            ],
-        ]
-    ]);
+    $rows_share = [
+        [
+            ['text' => $textbotlang['keyboard']['receiveMembershipGift'], 'callback_data' => "get_gift_start"],
+            ['text' => $textbotlang['keyboard']['shareLink'], 'url' => "https://t.me/share/url?url=https://t.me/$usernamebot?start=$from_id"],
+        ],
+    ];
+    $text_freeconfig = "";
+    $freeconfiginfo = affiliateFreeConfigStatus($from_id);
+    if ($freeconfiginfo['status'] == "onfreeconfig") {
+        $text_freeconfig = "\n" . sprintf(
+            $textbotlang['users']['affiliates']['freeConfigInfo'],
+            $freeconfiginfo['required'],
+            $freeconfiginfo['progress'],
+            $freeconfiginfo['required'],
+            $freeconfiginfo['claimed'],
+            $freeconfiginfo['max']
+        );
+        if ($freeconfiginfo['claimable'] > 0) {
+            $rows_share[] = [
+                ['text' => $textbotlang['keyboard']['getFreeConfig'], 'callback_data' => "get_free_config"],
+            ];
+        }
+    }
+    $keyboard_share = json_encode(['inline_keyboard' => $rows_share]);
     $text_start = "";
     $text_porsant = "";
     $Percent_porsant = $setting['affiliatespercentage'];
@@ -5743,7 +5759,7 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
     if ($affiliatescommission['status_commission'] == "oncommission") {
         $text_porsant = sprintf($textbotlang['users']['affiliates']['purchaseCommissionInfo'], $Percent_porsant);
     }
-    $textaffiliates = sprintf($textbotlang['users']['affiliates']['welcomeGiftInfo'], $text_start, $text_porsant, $user['affiliatescount'], $inforefral['orders'], $sum_order);
+    $textaffiliates = sprintf($textbotlang['users']['affiliates']['welcomeGiftInfo'], $text_start, $text_porsant, $user['affiliatescount'], $inforefral['orders'], $sum_order) . $text_freeconfig;
 
     sendmessage($from_id, $textaffiliates, $keyboard_share, 'HTML');
 } elseif ($datain == "get_gift_start") {
@@ -5786,6 +5802,84 @@ if (preg_match('/^sendresidcart-(.*)/', $datain, $dataget)) {
             'parse_mode' => "HTML"
         ]);
     }
+} elseif ($datain == "get_free_config") {
+    if ($setting['affiliatesstatus'] == "offaffiliates") {
+        sendmessage($from_id, $textbotlang['users']['affiliates']['offaffiliates'], null, 'HTML');
+        return;
+    }
+    $freeconfiginfo = affiliateFreeConfigStatus($from_id);
+    if ($freeconfiginfo['status'] != "onfreeconfig") {
+        sendmessage($from_id, $textbotlang['users']['affiliates']['freeConfigOff'], null, 'HTML');
+        return;
+    }
+    if ($freeconfiginfo['claimed'] >= $freeconfiginfo['max']) {
+        sendmessage($from_id, $textbotlang['users']['affiliates']['freeConfigLimit'], null, 'HTML');
+        return;
+    }
+    if ($freeconfiginfo['claimable'] < 1) {
+        sendmessage($from_id, sprintf($textbotlang['users']['affiliates']['freeConfigNotEnough'], $freeconfiginfo['remaining']), null, 'HTML');
+        return;
+    }
+    $reward_id = reserveAffiliateFreeConfig($from_id, $freeconfiginfo['claimed'] + 1, $freeconfiginfo['invites']);
+    if ($reward_id == 0) {
+        sendmessage($from_id, $textbotlang['users']['affiliates']['freeConfigProcessing'], null, 'HTML');
+        return;
+    }
+    $freeconfig = createAffiliateFreeConfig($from_id, $username);
+    if (!$freeconfig['status']) {
+        $stmt = $pdo->prepare("DELETE FROM affiliate_freeconfig WHERE id = :id");
+        $stmt->execute([':id' => $reward_id]);
+        if ($freeconfig['error'] == "nopanel" || $freeconfig['error'] == "stock") {
+            sendmessage($from_id, $textbotlang['users']['affiliates']['freeConfigNoPanel'], $keyboard, 'HTML');
+            return;
+        }
+        sendmessage($from_id, $textbotlang['users']['affiliates']['freeConfigError'], $keyboard, 'HTML');
+        if (strlen($setting['Channel_Report']) > 0) {
+            telegram('sendmessage', [
+                'chat_id' => $setting['Channel_Report'],
+                'message_thread_id' => $errorreport,
+                'text' => sprintf($textbotlang['Admin']['reportgroup']['errorTestAccountCreate'], $freeconfig['msg'], $from_id, $username, $freeconfig['panel']['name_panel']),
+                'parse_mode' => "HTML"
+            ]);
+        }
+        return;
+    }
+    update("affiliate_freeconfig", "id_invoice", $freeconfig['invoice'], "id", $reward_id);
+    $panelfree = $freeconfig['panel'];
+    $freeconfiginfobtn = json_encode([
+        'inline_keyboard' => [
+            [
+                ['text' => $textbotlang['users']['help']['btninlinebuy'], 'callback_data' => "helpbtn"],
+            ]
+        ]
+    ]);
+    $textafter = $textbotlang['textbot']['afterText'];
+    if ($panelfree['type'] == "WGDashboard")
+        $textafter = $textbotlang['users']['sell']['created'];
+    if ($panelfree['type'] == "ibsng" || $panelfree['type'] == "mikrotik")
+        $textafter = $textbotlang['textbot']['afterPayIbsng'];
+    $textcreatuser = str_replace('{username}', $freeconfig['username_service'], $textafter);
+    $textcreatuser = str_replace('{name_service}', $textbotlang['common']['labels']['freeConfigService'], $textcreatuser);
+    $textcreatuser = str_replace('{location}', $panelfree['name_panel'], $textcreatuser);
+    $textcreatuser = str_replace('{day}', $panelfree['time_usertest'], $textcreatuser);
+    $textcreatuser = str_replace('{volume}', $panelfree['val_usertest'], $textcreatuser);
+    $textcreatuser = str_replace('{config}', "<code>{$freeconfig['sub_link']}</code>", $textcreatuser);
+    $textcreatuser = str_replace('{links}', "", $textcreatuser);
+    $textcreatuser = str_replace('{links2}', $freeconfig['sub_link'], $textcreatuser);
+    if ($panelfree['type'] == "ibsng" || $panelfree['type'] == "mikrotik") {
+        $textcreatuser = str_replace('{password}', $freeconfig['subscription_url'], $textcreatuser);
+        update("invoice", "user_info", $freeconfig['subscription_url'], "id_invoice", $freeconfig['invoice']);
+    }
+    sendMessageService($panelfree, $freeconfig['configs'], $freeconfig['sub_link'], $freeconfig['username_service'], $freeconfiginfobtn, $textcreatuser, $freeconfig['invoice']);
+    if (strlen($setting['Channel_Report']) > 0) {
+        telegram('sendmessage', [
+            'chat_id' => $setting['Channel_Report'],
+            'message_thread_id' => $otherreport,
+            'text' => sprintf($textbotlang['Admin']['reportgroup']['freeConfigGranted'], $from_id, $username, $freeconfiginfo['invites'], $freeconfig['username_service']),
+            'parse_mode' => "HTML"
+        ]);
+    }
+    step('home', $from_id);
 } elseif (preg_match('/Extra_volumes_(\w+)_(.*)/', $datain, $dataget)) {
     $usernamepanel = $dataget[1];
     $locations = select("marzban_panel", "*", "code_panel", $dataget[2], "select");

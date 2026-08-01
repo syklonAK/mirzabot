@@ -183,6 +183,7 @@ return [
                         'testService3' => '测试服务',
                         'testService4' => '测试服务',
                         'testService5' => '测试服务',
+                        'freeConfigService' => '下线免费配置',
                         'testServiceFn' => '测试服务',
                         'unknown' => '未知',
                         'unlimited' => '无限制',
@@ -494,6 +495,16 @@ return [
                         'verified' => '您的账户认证成功',
                 ],
                 'affiliates' => [
+                        'freeConfigInfo' => '<b>🎁 下线免费配置：</b>
+• 每 %s 位下线可获得 1 个免费配置
+• 您的进度：%s / %s 人
+• 已领取：%s / %s',
+                        'freeConfigOff' => '❌ 下线免费配置功能已关闭',
+                        'freeConfigNotEnough' => '📛 您尚未达到要求，还需要 %s 位下线。',
+                        'freeConfigLimit' => '⛔ 您已达到免费配置的领取上限。',
+                        'freeConfigNoPanel' => '❌ 当前没有为免费配置设置面板。',
+                        'freeConfigError' => '❌ 创建免费配置失败，请稍后再试。',
+                        'freeConfigProcessing' => '⏳ 您之前的请求正在处理中，请稍候。',
                         'affiliateedago' => '❌ 您之前已是其他用户的下线，无法再次成为下线',
                         'affiliatesidyou' => '❌ 无法使用此用户ID成为下线。',
                         'invalidaffiliates' => '❌ 您不能成为自己的下线',
@@ -1515,6 +1526,9 @@ n2',
                         'commission' => '机器人启动后赠送功能的启用状态',
                         'commissionOff' => '佣金功能已停用',
                         'commissionOn' => '佣金功能已启用',
+                        'freeConfigAffiliates' => '下线免费配置功能状态',
+                        'freeConfigAffiliatesOn' => '下线免费配置已开启',
+                        'freeConfigAffiliatesOff' => '下线免费配置已关闭',
                         'discountAffiliates' => '赠送功能的启用状态',
                         'discountAffiliatesOff' => '赠送功能已停用',
                         'discountAffiliatesOn' => '赠送功能已启用',
@@ -1572,6 +1586,10 @@ n2',
                         'percentSaved' => '✅ 用户的返现比例已成功设置',
                         'bannerSaved' => '✅ 您的横幅已成功登记。',
                         'invalidBanner' => '❌ 您发送的横幅无效（横幅必须附带图片发送）',
+                        'askFreeConfigCount' => '📌 请输入获得一个免费配置所需的下线数量',
+                        'freeConfigCountSaved' => '✅ 免费配置所需下线数量已保存',
+                        'askFreeConfigMax' => '📌 请输入每位用户可领取的免费配置最大数量',
+                        'freeConfigMaxSaved' => '✅ 免费配置上限已保存',
                         'askJoinGift' => '📌 请输入您希望用户每次新增下线时获得的金额',
                         'askPercent' => '📌 请发送您希望在购买后返现给用户的比例',
                         'titleTopic' => '🎁 佣金报告',
@@ -2831,6 +2849,12 @@ f,n.n2',
 - 🆔用户数字 ID：%s
 - 💸 交易金额 %s
 - 💳 支付方式：第三里亚尔货币',
+                        'freeConfigGranted' => '🎁 下线免费配置
+
+👤 用户：%s
+🆔 用户名：@%s
+👥 下线数：%s
+📦 服务：%s',
                         'membershipGiftPaid' => '🎁 会员礼品支付
  -数字 ID：%s
  - 用户名：@%s
@@ -4041,6 +4065,10 @@ f,n.n2',
                 'serviceSettings' => '⚙️ 服务设置',
                 'serviceStatus' => '服务状态',
                 'setAffiliateBanner' => '🏞 设置下线收集横幅',
+                'getFreeConfig' => '🎁 领取免费配置',
+                'affiliateFreeConfig' => '🎁 下线免费配置',
+                'affiliateFreeConfigCount' => '👥 免费配置所需下线数',
+                'affiliateFreeConfigMax' => '🔢 免费配置上限',
                 'setAffiliatePercent' => '🧮 设置下线百分比',
                 'setApi' => '设置 api',
                 'setAqayePardakhtMerchant' => '设置 Aghaye Pardakht 商户',
